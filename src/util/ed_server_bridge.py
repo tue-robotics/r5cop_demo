@@ -8,7 +8,7 @@ import socket
 from ed.srv import Query
 
 # XML RPC SERVER
-from threading import Thread
+import thread
 import xmlrpclib
 from SimpleXMLRPCServer import SimpleXMLRPCServer as Server
 import rospy
@@ -23,7 +23,10 @@ class SyncServer():
         self._server = Server((ip, port), allow_none=True)
         self._server.register_function(self.get, 'get')
 
-        self._ros_service_proxy = rospy.ServiceProxy('/amigo/ed/query', Query)
+        self._ros_service_proxy = rospy.ServiceProxy('ed/query', Query)
+
+        self._sp  = ServerProxy("http://%s:%d"%(ip,port))
+        self._stop = False
 
     # RPC METHOD
     def get(self, ids, properties, since_revision):
@@ -48,6 +51,17 @@ class SyncServer():
             self._server.serve_forever()
         except KeyboardInterrupt:
             pass
+
+    def serve(self):
+        thread.start_new_thread(self._serve, ())
+        rospy.spin()
+        self._stop = True
+        self._sp.ping()
+
+    def _serve(self):
+        while not self._stop:
+            self._server.handle_request()
+        rospy.loginfo("Shutting down SyncServer")
 
 # Main function
 if __name__ == '__main__':
