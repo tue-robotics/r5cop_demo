@@ -18,6 +18,7 @@ class CleanInspect(smach.StateMachine):
                                    robot_smach_states.Say(robot, ["I'm going to inspect the %s" % entity_id], block=False),
                                    transitions={"spoken": "INSPECT"})
 
+            # TODO: Navigate to symbolic + worldmodel segment (instead of this inspect state that combines navigate to observe and the segment state
             smach.StateMachine.add("INSPECT",
                                    robot_smach_states.world_model.Inspect(robot, EdEntityDesignator(robot, id=entity_id),
                                                                           objectIDsDes=found_entity_classifications_designator),
