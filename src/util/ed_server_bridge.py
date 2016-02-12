@@ -13,8 +13,9 @@ import xmlrpclib
 from SimpleXMLRPCServer import SimpleXMLRPCServer as Server
 import rospy
 
+
 def error(error):
-    print "ERROR: %s"%error
+    print "ERROR: %s" % error
     sys.exit()
 
 class SyncServer():
