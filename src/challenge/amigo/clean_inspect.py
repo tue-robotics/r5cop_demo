@@ -4,14 +4,14 @@ import robot_smach_states
 from robot_smach_states.util.designators import EdEntityDesignator, VariableDesignator
 
 from handle_detected_entities import HandleDetectedEntities
-
+from robot_skills.classification_result import ClassificationResult
 
 class CleanInspect(smach.StateMachine):
     def __init__(self, robot, entity_id, known_types):
 
         smach.StateMachine.__init__(self, outcomes=['done'])
 
-        found_entity_classifications_designator = VariableDesignator([])
+        found_entity_classifications_designator = VariableDesignator([], resolve_type=[ClassificationResult])
 
         with self:
             smach.StateMachine.add("SAY_GOING_TO_INSPECT",
