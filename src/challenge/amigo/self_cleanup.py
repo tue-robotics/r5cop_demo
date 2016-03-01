@@ -59,7 +59,7 @@ class SelfCleanup(smach.StateMachine):
             smach.StateMachine.add("GRAB",
                                    robot_smach_states.Grab(robot, selected_entity_designator,
                                                            UnoccupiedArmDesignator(robot.arms,
-                                                                                   robot.leftArm,
+                                                                                   robot.rightArm,
                                                                                    name="empty_arm_designator")),
                                    transitions={"done": "SAY_GRAB_SUCCESS", "failed": "SAY_GRAB_FAILED"})
 
@@ -82,7 +82,7 @@ class SelfCleanup(smach.StateMachine):
                                                             selected_entity_designator, 
                                                             place_pose, 
                                                             OccupiedArmDesignator(robot.arms,
-                                                                                  robot.leftArm,
+                                                                                  robot.rightArm,
                                                                                   name="occupied_arm_designator")),
                                    transitions={"done": "SAY_PLACE_SUCCESS", "failed": "SAY_PLACE_FAILED"})
 
