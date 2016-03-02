@@ -27,8 +27,6 @@ class SelectEntity(smach.State):
         rospy.loginfo("We have selected the entity with id %s" % entity_classification.id)
         self._selected_entity_designator.id_ = entity_classification.id
 
-        print self._selected_entity_designator.resolve()
-
         return "entity_selected"
 
 
