@@ -8,45 +8,48 @@ from robot_skills.classification_result import ClassificationResult
 
 
 class CleanInspect(smach.StateMachine):
-    def __init__(self, robot, entity_id, room_id, navigate_area, segment_areas, known_types):
+    def __init__(self, robot, location_id, room_id, navigate_area, segment_areas, known_types):
 
         smach.StateMachine.__init__(self, outcomes=['done'])
 
         # Set up the designators for this machine
         e_classifications_des = VariableDesignator([], resolve_type=[ClassificationResult])
-        e_des = EdEntityDesignator(robot, id=entity_id)
+        e_des = EdEntityDesignator(robot, id=location_id)
         room_des = EdEntityDesignator(robot, id=room_id)
 
         with self:
 
-            smach.StateMachine.add("RESET_ED", robot_smach_states.ResetED(robot),
-                                   transitions={'done': 'NAVIGATE'})
-
-            smach.StateMachine.add("NAVIGATE",
-                                   robot_smach_states.NavigateToSymbolic(robot, {e_des: navigate_area, room_des: "in"},
-                                                                         e_des),
-                                   transitions={'arrived': 'SEGMENT_SAY_0',
-                                                'unreachable': 'SAY_UNREACHABLE',
-                                                'goal_not_defined': 'SAY_UNREACHABLE'})
-
+            # Loop over the areas that we have to segment and handle segmented objects for the specified navigation area
             for i, segment_area in enumerate(segment_areas):
+
+                smach.StateMachine.add("RESET_ED_%d" % i, robot_smach_states.ResetED(robot),
+                                       transitions={'done': 'NAVIGATE_%d' % i})
+
+                smach.StateMachine.add("NAVIGATE_%d" % i,
+                                       robot_smach_states.NavigateToSymbolic(robot, {e_des: navigate_area, room_des: "in"},
+                                                                             e_des),
+                                       transitions={'arrived': 'SEGMENT_SAY_%d' % i,
+                                                    'unreachable': "SAY_UNREACHABLE_%d" % i,
+                                                    'goal_not_defined': "SAY_UNREACHABLE_%d" % i})
 
                 smach.StateMachine.add("SEGMENT_SAY_%d" % i,
                                        robot_smach_states.Say(robot, ["Looking %s the %s"
-                                                                      % (segment_area, entity_id)], block=False),
+                                                                      % (segment_area, location_id)], block=False),
                                        transitions={"spoken": "SEGMENT_%d" % i})
 
-                next_state = "SEGMENT_SAY_%d" % (i + 1) if i + 1 < len(segment_areas) else "HANDLE_DETECTED_ENTITIES"
                 smach.StateMachine.add('SEGMENT_%d' % i, robot_smach_states.SegmentObjects(robot,
                                                                                            e_classifications_des.writeable,
                                                                                            e_des,
                                                                                            segment_area),
-                                       transitions={'done': next_state})
+                                       transitions={'done': "HANDLE_DETECTED_ENTITIES_%d" % i})
 
-            smach.StateMachine.add("SAY_UNREACHABLE",
-                                   robot_smach_states.Say(robot, ["I failed to inspect the %s" % entity_id], block=False),
-                                   transitions={"spoken": "done"})
+                # Determine the next state, either it is the next iter or done
+                next_state = "RESET_ED_%d" % (i + 1) if i + 1 < len(segment_areas) else "done"
 
-            smach.StateMachine.add("HANDLE_DETECTED_ENTITIES",
-                                   HandleDetectedEntities(robot, e_classifications_des, known_types),
-                                   transitions={"done": "done"})
+                smach.StateMachine.add("SAY_UNREACHABLE_%d" % i,
+                                       robot_smach_states.Say(robot, ["I failed to inspect the %s" % location_id], block=False),
+                                       transitions={"spoken":next_state})
+
+                smach.StateMachine.add("HANDLE_DETECTED_ENTITIES_%d" % i,
+                                       HandleDetectedEntities(robot, e_classifications_des, known_types, location_id, segment_area),
+                                       transitions={"done": next_state})

@@ -45,7 +45,7 @@ class Speak(smach.State):
 
 
 class SelfCleanup(smach.StateMachine):
-    def __init__(self, robot, selected_entity_designator):
+    def __init__(self, robot, selected_entity_designator, location_id, segment_area):
 
         smach.StateMachine.__init__(self, outcomes=['done'])
 
