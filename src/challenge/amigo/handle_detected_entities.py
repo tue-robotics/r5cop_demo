@@ -32,7 +32,7 @@ class SelectEntity(smach.State):
 
 class DetermineAction(smach.State):
     def __init__(self, robot, selected_entity_designator, known_types):
-        smach.State.__init__(self, outcomes=["self", "operator", "other_robot"])
+        smach.State.__init__(self, outcomes=["self", "operator", "other_robot", "failed"])
         self._robot = robot
         self._known_types = known_types
         self._selected_entity_designator = selected_entity_designator
@@ -40,6 +40,10 @@ class DetermineAction(smach.State):
     def execute(self, userdata):
 
         selected_entity = self._selected_entity_designator.resolve()
+
+        if not selected_entity:
+            rospy.logerr("Could not resolve the selected entity!")
+            return "failed"
 
         rospy.loginfo("The type of the entity is '%s'" % selected_entity.type)
 
@@ -98,6 +102,7 @@ class HandleDetectedEntities(smach.StateMachine):
                                    DetermineAction(robot, selected_entity_designator, known_types),
                                    transitions={"self": "SELF_CLEANUP",
                                                 "operator": "OPERATOR_CLEANUP",
+                                                "failed": "SELECT_ENTITY",
                                                 "other_robot": "OTHER_ROBOT_CLEANUP"})
 
             smach.StateMachine.add("SELF_CLEANUP", SelfCleanup(robot, selected_entity_designator, location_id, segment_area),
