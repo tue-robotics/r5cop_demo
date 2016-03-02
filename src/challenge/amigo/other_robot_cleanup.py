@@ -1,26 +1,17 @@
 import smach
+import robot_smach_states
 
-
-class Test(smach.State):
-    def __init__(self, robot, selected_entity_designator):
-        smach.State.__init__(self, outcomes=["done"])
-        self._robot = robot
-        self._selected_entity_designator = selected_entity_designator
-
-    def execute(self, userdata):
-
-        id_str = self._selected_entity_designator.resolve().id[0:4]
-
-        self._robot.speech.speak("Hi jaguar, please cleanup the %s object" % id_str, block=True)
-
-        return "done"
 
 class OtherRobotCleanup(smach.StateMachine):
     def __init__(self, robot, selected_entity_designator, location_id, segment_area):
 
         smach.StateMachine.__init__(self, outcomes=['done'])
 
+        sentences = ["Jaguar, please clean this object %s the %s" % (segment_area, location_id),
+                     "Jaguar, can you clean the trash %s the %s?" % (segment_area, location_id),
+                     "Can another robot clean the garbage %s the %s?" % (segment_area, location_id)]
         with self:
 
-            smach.StateMachine.add("TEST", Test(robot, selected_entity_designator),
-                                   transitions={"done": "done"})
+            smach.StateMachine.add('SAY_OTHER_ROBOT_CLEANUP',
+                                   robot_smach_states.Say(robot, sentences, block=True),
+                                   transitions={"spoken": "done"})
