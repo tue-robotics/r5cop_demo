@@ -1,5 +1,6 @@
 import smach
 import robot_smach_states
+import random
 
 from robot_smach_states.util.designators import UnoccupiedArmDesignator, OccupiedArmDesignator, Designator
 
@@ -31,15 +32,29 @@ class dropPoseDesignator(Designator):
 
 
 class Speak(smach.State):
-    def __init__(self, robot, selected_entity_designator):
+    def __init__(self, robot, selected_entity_designator, location_id, segment_area):
         smach.State.__init__(self, outcomes=["done"])
         self._robot = robot
         self._selected_entity_designator = selected_entity_designator
 
+        object_description = "%s the %s" % (segment_area, location_id)
+        self._sentences = [
+            "I will grab the %s " + object_description,
+            "Grabbing the %s " + object_description,
+            "Cleaning the %s " + object_description,
+            "Getting rid of the %s " + object_description,
+            "Removing the %s " + object_description
+        ]
+
     def execute(self, userdata):
         e = self._selected_entity_designator.resolve()
 
-        self._robot.speech.speak("I will clean the %s object which is a %s" % (e.id[0:4], e.type), block=False)
+        if e and e.type != "":
+            e_type = e.type
+        else:
+            e_type = random.choice(["unknown object", "trash object", "garbage object"])
+
+        self._robot.speech.speak(random.choice(self._sentences) % e_type, block=False)
 
         return "done"
 
@@ -47,13 +62,13 @@ class Speak(smach.State):
 class SelfCleanup(smach.StateMachine):
     def __init__(self, robot, selected_entity_designator, location_id, segment_area):
 
-        smach.StateMachine.__init__(self, outcomes=['done'])
+        smach.StateMachine.__init__(self, outcomes=['done','failed'])
 
         place_pose = dropPoseDesignator(robot, 0.6, "drop_pose")
 
         with self:
 
-            smach.StateMachine.add("SPEAK", Speak(robot, selected_entity_designator),
+            smach.StateMachine.add("SPEAK", Speak(robot, selected_entity_designator, location_id, segment_area),
                                    transitions={"done": "GRAB"})
 
             smach.StateMachine.add("GRAB",
@@ -75,7 +90,7 @@ class SelfCleanup(smach.StateMachine):
                                                                   "I failed to grasp the item",
                                                                   "I cannot reach the item",
                                                                   "Item grab failed"], block=False),
-                                   transitions={"spoken": "done"})
+                                   transitions={"spoken": "failed"})
 
             smach.StateMachine.add('PLACE',
                                    robot_smach_states.Place(robot, 
