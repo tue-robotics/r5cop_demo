@@ -9,6 +9,10 @@ from self_cleanup import SelfCleanup
 from other_robot_cleanup import OtherRobotCleanup
 
 
+def _loginfo_color(text):
+    rospy.loginfo('\033[94m' + text + '\033[0m')
+
+
 class SelectEntity(smach.State):
     def __init__(self, robot, entitity_classifications_designator, selected_entity_designator):
         smach.State.__init__(self, outcomes=["entity_selected", "no_entities_left"])
@@ -36,6 +40,28 @@ class DetermineAction(smach.State):
         self._robot = robot
         self._known_types = known_types
         self._selected_entity_designator = selected_entity_designator
+
+    def _get_action_outcome(self, e):
+        _loginfo_color("== GET ACTION OUTCOME ==")
+        _loginfo_color("Known types: '%s'" % self._known_types)
+        _loginfo_color("Entity type: '%s'" % e.type)
+        _loginfo_color("Entity pose position z: '%.3f'" % e.pose.position.z)
+
+        # Check if we know the object
+        if e.type in self._known_types:
+            _loginfo_color("Known object")
+            # Check if the object is on the ground
+            if e.pose.position.z < 0.4:
+                _loginfo_color("Object is on the ground, we cannot grasp it, call for help")
+                action = "other_robot"
+            else:
+                _loginfo_color("Object is not on the ground, we can grasp it")
+                action = "self"
+        else:
+            _loginfo_color("Unknown object")
+            action = "operator"
+
+        return action
 
     def execute(self, userdata):
 
@@ -66,14 +92,7 @@ class DetermineAction(smach.State):
             except Exception as e:
                 rospy.logerr(e)
 
-        if selected_entity.type not in self._known_types:
-            return "operator"
-
-        # Ground
-        if selected_entity.pose.position.z < 0.4:
-            return "other_robot"
-
-        return "self"
+        return self._get_action_outcome(selected_entity)
 
 
 class HandleDetectedEntities(smach.StateMachine):
