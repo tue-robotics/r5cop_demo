@@ -11,7 +11,7 @@
         
     </group>
 
-    <group ns="jaguar">
+    <group ns="x80sv">
 
         <node name="trigger_server" pkg="r5cop_demo" type="trigger_server.py" output="screen">
             <param name="ip" value="localhost" />

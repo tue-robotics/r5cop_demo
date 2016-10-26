@@ -17,7 +17,7 @@
         <node name="trigger_client" pkg="r5cop_demo" type="trigger_client.py" output="screen">
             <param name="ip" value="localhost" />
             <param name="port" value="4001" />
-            <param name="remote_robot_name" value="jaguar" />
+            <param name="remote_robot_name" value="x80sv" />
         </node>
 
     </group>

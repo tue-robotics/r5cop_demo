@@ -7,8 +7,10 @@ class OtherRobotCleanup(smach.StateMachine):
 
         smach.StateMachine.__init__(self, outcomes=['done'])
 
-        sentences = ["Jaguar, please clean this object %s the %s" % (segment_area, location_id),
-                     "Jaguar, can you clean the trash %s the %s?" % (segment_area, location_id),
+        other_robot_name = "X80SV"
+
+        sentences = ["%s, please clean this object %s the %s" % (other_robot_name, segment_area, location_id),
+                     "%s, can you clean the trash %s the %s?" % (other_robot_name, segment_area, location_id),
                      "Can another robot clean the garbage %s the %s?" % (segment_area, location_id)]
         with self:
 
