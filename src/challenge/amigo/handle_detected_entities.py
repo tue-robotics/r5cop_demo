@@ -100,7 +100,7 @@ class HandleDetectedEntities(smach.StateMachine):
 
         smach.StateMachine.__init__(self, outcomes=['done'])
 
-        selected_entity_designator = EntityByIdDesignator(robot, "TBD")
+        selected_entity_designator = EntityByIdDesignator(robot, "TBD", name='selected_entity_designator', )
 
         with self:
 

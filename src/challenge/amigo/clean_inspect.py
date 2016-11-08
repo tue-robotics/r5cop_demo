@@ -13,9 +13,9 @@ class CleanInspect(smach.StateMachine):
         smach.StateMachine.__init__(self, outcomes=['done'])
 
         # Set up the designators for this machine
-        e_classifications_des = VariableDesignator([], resolve_type=[ClassificationResult])
-        e_des = EdEntityDesignator(robot, id=location_id)
-        room_des = EdEntityDesignator(robot, id=room_id)
+        e_classifications_des = VariableDesignator([], resolve_type=[ClassificationResult], name='e_classifications_des')
+        e_des = EdEntityDesignator(robot, id=location_id, name='e_des')
+        room_des = EdEntityDesignator(robot, id=room_id, name='room_des')
 
         with self:
 
