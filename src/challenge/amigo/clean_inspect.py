@@ -1,7 +1,7 @@
 import smach
 
 import robot_smach_states
-from robot_smach_states.util.designators import EdEntityDesignator, VariableDesignator
+from robot_smach_states.util.designators import EdEntityDesignator, VariableDesignator, EntityByIdDesignator
 
 from handle_detected_entities import HandleDetectedEntities
 from robot_skills.classification_result import ClassificationResult
@@ -15,7 +15,7 @@ class CleanInspect(smach.StateMachine):
         # Set up the designators for this machine
         e_classifications_des = VariableDesignator([], resolve_type=[ClassificationResult], name='e_classifications_des')
         e_des = EdEntityDesignator(robot, id=location_id, name='e_des')
-        room_des = EdEntityDesignator(robot, id=room_id, name='room_des')
+        room_des = EntityByIdDesignator(robot, id=room_id, name='room_des')
 
         with self:
 
