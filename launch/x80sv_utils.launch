@@ -4,21 +4,22 @@
 
     <group ns="amigo">
 
-        <node name="ed" pkg="r5cop_demo" type="ed_client_bridge.py">
-            <param name="ip" value="192.168.2.91" />
-            <param name="port" value="3000" />
-        </node>
+<!--        <node name="ed" pkg="r5cop_demo" type="ed_client_bridge.py">-->
+<!--            <param name="ip" value="192.168." />-->
+<!--            <param name="port" value="3000" />-->
+<!--        </node>-->
         
     </group>
 
     <group ns="x80sv">
 
-        <node name="trigger_server" pkg="r5cop_demo" type="trigger_server.py" output="screen">
+        <node name="trigger_server" pkg="multirobot_communication" type="trigger_server.py" output="screen">
             <param name="ip" value="localhost" />
             <param name="port" value="4001" />
+            <param name="robot_name" value="x80sv" />
         </node>
 
-        <node name="trigger_client" pkg="r5cop_demo" type="trigger_client.py" output="screen">
+        <node name="trigger_client" pkg="multirobot_communication" type="trigger_client.py" output="screen">
             <param name="ip" value="localhost" />
             <param name="port" value="4000" />
             <param name="remote_robot_name" value="amigo" />
