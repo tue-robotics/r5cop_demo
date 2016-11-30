@@ -16,4 +16,4 @@ Launch, configuration, executives files for the r5cop demonstrator of the x80sv 
 2. Start cleanup task using GUI
 3. Share world model with x80sv
 4. See workflow diagram
-5. Demo should be able to run for hours [prio] (robustness)
+5. Demo should be able to run for hours [prio] robustness
