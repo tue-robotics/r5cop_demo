@@ -7,3 +7,6 @@ Launch, configuration, executives files for the r5cop demonstrator of the x80sv 
 
 ## Scenario overview
 ![Scenario](img/scenario.png)
+
+## Additional 
+1. Push object picture of unknown object to operator and ask whether the robot should clean the object or not 
