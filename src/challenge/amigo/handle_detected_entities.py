@@ -107,15 +107,8 @@ class HandleDetectedEntities(smach.StateMachine):
             smach.StateMachine.add("SELECT_ENTITY",
                                    SelectEntity(robot, found_entity_classifications_designator,
                                                 selected_entity_designator),
-                                   transitions={"entity_selected": "NAVIGATE_TO_ENTITY",
+                                   transitions={"entity_selected": "DETERMINE_ACTION",
                                                 "no_entities_left": "done"})
-
-            smach.StateMachine.add("NAVIGATE_TO_ENTITY",
-                                   robot_smach_states.NavigateToSymbolic(robot, {selected_entity_designator: "near"},
-                                                                         selected_entity_designator),
-                                   transitions={'arrived': 'DETERMINE_ACTION',
-                                                'unreachable': 'DETERMINE_ACTION',
-                                                'goal_not_defined': 'DETERMINE_ACTION'})
 
             smach.StateMachine.add("DETERMINE_ACTION",
                                    DetermineAction(robot, selected_entity_designator, known_types),

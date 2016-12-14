@@ -21,7 +21,7 @@ def setup_statemachine(robot):
         smach.StateMachine.add( "START_CHALLENGE_ROBUST",
                                 robot_smach_states.Initialize(robot),
                                 transitions={"initialized": "SAY_START_CHALLENGE",
-                                             "abort": "SAY_START_CHALLENGE"})
+                                             "abort": "Aborted"})
 
         smach.StateMachine.add('SAY_START_CHALLENGE',
                                robot_smach_states.Say(robot, ["Starting R5COP Cooperative cleaning demonstrator",
