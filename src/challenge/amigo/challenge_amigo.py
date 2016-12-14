@@ -14,6 +14,7 @@ challenge_knowledge = load_knowledge('r5cop_demo')
 def setup_statemachine(robot):
 
     sm = smach.StateMachine(outcomes=['Done', 'Aborted'])
+    robot.ed.reset()
 
     with sm:
 

@@ -14,7 +14,6 @@ class ContactOtherRobot(smach.State):
         self._selected_entity_designator = selected_entity_designator
 
     def execute(self, userdata):
-        self._robot.speech.speak("Now I should contact %s" % other_robot_name)
 
         e = self._selected_entity_designator.resolve()
 
@@ -25,10 +24,10 @@ class ContactOtherRobot(smach.State):
 
         self._pub.publish(String(data=e.id))
 
-        self._robot.speech.speak("I have contacted %s" % other_robot_name)
-        self._robot.speech.speak("I will sleep here, exiting challenge")
+        self._robot.speech.speak("I have contacted %s, waiting for continue trigger" % other_robot_name, block=False)
 
-        sys.exit(1)
+        return "done"
+
 
 class OtherRobotCleanup(smach.StateMachine):
     def __init__(self, robot, selected_entity_designator, location_id, segment_area):
@@ -46,7 +45,11 @@ class OtherRobotCleanup(smach.StateMachine):
 
             smach.StateMachine.add('CONTACT_OTHER_ROBOT',
                                    ContactOtherRobot(robot, selected_entity_designator),
-                                   transitions={"done": "SAY_DONE", "failed": "SAY_FAILED"})
+                                   transitions={"done": "WAIT_FOR_TRIGGER", "failed": "SAY_FAILED"})
+
+            smach.StateMachine.add('WAIT_FOR_TRIGGER',
+                                   robot_smach_states.WaitForTrigger(robot, ["continue"], "/amigo/trigger"),
+                                   transitions={"continue": "SAY_DONE", "preempted" : "SAY_FAILED"})
 
             smach.StateMachine.add('SAY_DONE',
                                    robot_smach_states.Say(robot, ["Thanks for cleaning", "Thank you", "You are the best"], block=True),

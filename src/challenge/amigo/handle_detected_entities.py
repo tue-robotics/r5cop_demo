@@ -47,19 +47,18 @@ class DetermineAction(smach.State):
         _loginfo_color("Entity type: '%s'" % e.type)
         _loginfo_color("Entity pose position z: '%.3f'" % e.pose.position.z)
 
-        # Check if we know the object
-        if e.type in self._known_types:
-            _loginfo_color("Known object")
-            # Check if the object is on the ground
-            if e.pose.position.z < 0.4:
-                _loginfo_color("Object is on the ground, we cannot grasp it, call for help")
-                action = "other_robot"
-            else:
+        # Check if the object is on the ground
+        if e.pose.position.z < 0.4:
+            _loginfo_color("Object is on the ground, we cannot grasp it, call for help")
+            action = "other_robot"
+        else:
+            # Check if we know the object
+            if e.type in self._known_types:
                 _loginfo_color("Object is not on the ground, we can grasp it")
                 action = "self"
-        else:
-            _loginfo_color("Unknown object")
-            action = "operator"
+            else:
+                _loginfo_color("Unknown object")
+                action = "operator"
 
         return action
 
