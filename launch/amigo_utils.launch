@@ -18,7 +18,7 @@
         <node name="trigger_client" pkg="multirobot_communication" type="trigger_client.py" output="screen">
             <param name="ip" value="localhost" />
             <param name="port" value="4001" />
-            <param name="remove_robot_name" value="x80sv" />
+            <param name="remote_robot_name" value="x80sv" />
         </node>
 
     </group>
