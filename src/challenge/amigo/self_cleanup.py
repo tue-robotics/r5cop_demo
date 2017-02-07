@@ -9,7 +9,7 @@ from PyKDL import Frame
 
 class dropPoseDesignator(Designator):
     def __init__(self, robot, drop_height, name):
-        super(dropPoseDesignator, self).__init__(resolve_type=Frame, name=name)
+        super(dropPoseDesignator, self).__init__(resolve_type=(Frame, str), name=name)
 
         self._robot = robot
         self._drop_height = drop_height
@@ -25,7 +25,7 @@ class dropPoseDesignator(Designator):
 
         frame.p.z(self._drop_height)
 
-        return frame
+        return frame, "/map"
 
 
 class ArmFree(smach.State):
@@ -34,7 +34,7 @@ class ArmFree(smach.State):
         self._robot = robot
 
     def execute(self, userdata):
-	d = UnoccupiedArmDesignator(self._robot.arms, self._robot.rightArm, name="empty_arm_designator2")
+        d = UnoccupiedArmDesignator(self._robot.arms, self._robot.rightArm, name="empty_arm_designator2")
         if d.resolve():
             return "yes"
         return "no"
@@ -45,7 +45,7 @@ class ArmOccupied(smach.State):
         self._robot = robot
 
     def execute(self, userdata):
-	d = OccupiedArmDesignator(self._robot.arms, self._robot.rightArm, name="empty_arm_designator2")
+        d = OccupiedArmDesignator(self._robot.arms, self._robot.rightArm, name="empty_arm_designator2")
         if d.resolve():
             return "yes"
         return "no"
