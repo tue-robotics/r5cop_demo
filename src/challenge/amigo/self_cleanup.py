@@ -4,31 +4,28 @@ import random
 
 from robot_smach_states.util.designators import UnoccupiedArmDesignator, OccupiedArmDesignator, Designator
 
-from geometry_msgs.msg import PoseStamped
+from PyKDL import Frame
 
 
 class dropPoseDesignator(Designator):
     def __init__(self, robot, drop_height, name):
-        super(dropPoseDesignator, self).__init__(resolve_type=PoseStamped, name=name)
+        super(dropPoseDesignator, self).__init__(resolve_type=Frame, name=name)
 
         self._robot = robot
         self._drop_height = drop_height
 
     def _resolve(self):
-        ps = PoseStamped()
+        frame = None
 
         # Query ed
         try:
-            p = self._robot.ed.get_entity(id="trashbin").pose
+            frame = self._robot.ed.get_entity(id="trashbin")._pose
         except:
             return None
 
-        p.position.z = self._drop_height
+        frame.p.z(self._drop_height)
 
-        ps.header.frame_id = "/map"
-        ps.pose = p
-
-        return ps
+        return frame
 
 
 class ArmFree(smach.State):
