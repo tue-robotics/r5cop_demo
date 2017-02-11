@@ -2,6 +2,7 @@ import smach
 import robot_smach_states
 import random
 
+from robot_skills.util.kdl_conversions import FrameStamped
 from robot_smach_states.util.designators import UnoccupiedArmDesignator, OccupiedArmDesignator, Designator
 
 from PyKDL import Frame
@@ -9,7 +10,7 @@ from PyKDL import Frame
 
 class dropPoseDesignator(Designator):
     def __init__(self, robot, drop_height, name):
-        super(dropPoseDesignator, self).__init__(resolve_type=(Frame, str), name=name)
+        super(dropPoseDesignator, self).__init__(resolve_type=FrameStamped, name=name)
 
         self._robot = robot
         self._drop_height = drop_height
@@ -25,7 +26,7 @@ class dropPoseDesignator(Designator):
 
         frame.p.z(self._drop_height)
 
-        return frame, "/map"
+        return FrameStamped(frame, "/map")
 
 
 class ArmFree(smach.State):
