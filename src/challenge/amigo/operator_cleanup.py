@@ -7,6 +7,7 @@ import cStringIO as StringIO
 import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
 from image_recognition_msgs.srv import Recognize
+import cv2
 
 
 def _get_cropped_image_from_info(info):        
@@ -69,7 +70,9 @@ class OperatorFeedback(smach.State):
             return "no_cleanup"
 
         try:
-            img_msg = self._bridge.cv2_to_imgmsg(np.array(image), "bgr8")
+            image = np.array(image)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            img_msg = self._bridge.cv2_to_imgmsg(image, "bgr8")
         except CvBridgeError as e:
             rospy.logerr(e)
             self._robot.speech.speak("I can not get an image of this object, I will not clean it up")
@@ -82,6 +85,8 @@ class OperatorFeedback(smach.State):
             rospy.logerr("Operator service call failed, I will not clean up the object")
             self._robot.speech.speak("I could not reach my operator, I will leave this object here")
             return "no_cleanup"
+
+        print res
 
         # For now if it is not recognized as something useful, we clean it up
         if not res.recognitions:
