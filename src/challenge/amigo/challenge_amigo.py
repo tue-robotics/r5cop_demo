@@ -21,9 +21,19 @@ def setup_statemachine(robot):
         # Start challenge via StartChallengeRobust
         smach.StateMachine.add( "START_CHALLENGE_ROBUST",
                                 robot_smach_states.StartChallengeRobust(robot, challenge_knowledge.starting_point, door=False),
-                                transitions={"Done": "SAY_START_CHALLENGE",
+                                transitions={"Done": "SAY_WAITING_FOR_TRIGGER",
                                              "Failed": "Aborted",
                                              "Aborted": "Aborted"})
+
+        smach.StateMachine.add('SAY_WAITING_FOR_TRIGGER',
+                               robot_smach_states.Say(robot, ["Trigger me if you need me!",
+                                                              "Waiting for trigger",
+                                                              "Waiting for you to call me!"], block=False),
+                               transitions={"spoken": "WAIT_FOR_TRIGGER"})
+
+        smach.StateMachine.add('WAIT_FOR_TRIGGER',
+                                robot_smach_states.WaitForTrigger(robot, ["gpsr"], "/amigo/trigger"),
+                                transitions={"gpsr": "SAY_START_CHALLENGE", "preempted" : "SAY_START_CHALLENGE"})
 
         smach.StateMachine.add('SAY_START_CHALLENGE',
                                robot_smach_states.Say(robot, ["Starting R5COP Cooperative cleaning demonstrator",

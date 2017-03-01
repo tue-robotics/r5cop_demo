@@ -4,6 +4,10 @@ import sys
 from std_msgs.msg import String
 import rospy
 
+from robot_smach_states.util.designators import EntityByIdDesignator
+from robocup_knowledge import load_knowledge
+challenge_knowledge = load_knowledge('r5cop_demo')
+
 other_robot_name = "x80sv"
 
 class ContactOtherRobot(smach.State):
@@ -40,8 +44,14 @@ class OtherRobotCleanup(smach.StateMachine):
         with self:
 
             smach.StateMachine.add('SAY_OTHER_ROBOT_CLEANUP',
-                                   robot_smach_states.Say(robot, sentences, block=True),
-                                   transitions={"spoken": "CONTACT_OTHER_ROBOT"})
+                                   robot_smach_states.Say(robot, sentences, block=False),
+                                   transitions={"spoken": "NAVIGATE_TO_INITIAL"})
+
+            smach.StateMachine.add( "NAVIGATE_TO_INITIAL",
+                                    robot_smach_states.NavigateToWaypoint(robot, EntityByIdDesignator(robot, id=challenge_knowledge.starting_point,), radius=0.05),
+                                    transitions={   'arrived'           : 'CONTACT_OTHER_ROBOT',
+                                                    'unreachable'       : 'CONTACT_OTHER_ROBOT',
+                                                    'goal_not_defined'  : 'CONTACT_OTHER_ROBOT'})
 
             smach.StateMachine.add('CONTACT_OTHER_ROBOT',
                                    ContactOtherRobot(robot, selected_entity_designator),
