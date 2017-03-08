@@ -2,33 +2,31 @@ import smach
 import robot_smach_states
 import random
 
+from robot_skills.util.kdl_conversions import FrameStamped
 from robot_smach_states.util.designators import UnoccupiedArmDesignator, OccupiedArmDesignator, Designator
 
-from geometry_msgs.msg import PoseStamped
+from PyKDL import Frame
 
 
 class dropPoseDesignator(Designator):
     def __init__(self, robot, drop_height, name):
-        super(dropPoseDesignator, self).__init__(resolve_type=PoseStamped, name=name)
+        super(dropPoseDesignator, self).__init__(resolve_type=FrameStamped, name=name)
 
         self._robot = robot
         self._drop_height = drop_height
 
     def _resolve(self):
-        ps = PoseStamped()
+        frame = None
 
         # Query ed
         try:
-            p = self._robot.ed.get_entity(id="trashbin").pose
+            frame = self._robot.ed.get_entity(id="trashbin")._pose
         except:
             return None
 
-        p.position.z = self._drop_height
+        frame.p.z(self._drop_height)
 
-        ps.header.frame_id = "/map"
-        ps.pose = p
-
-        return ps
+        return FrameStamped(frame, "/map")
 
 
 class ArmFree(smach.State):
@@ -37,7 +35,7 @@ class ArmFree(smach.State):
         self._robot = robot
 
     def execute(self, userdata):
-	d = UnoccupiedArmDesignator(self._robot.arms, self._robot.rightArm, name="empty_arm_designator2")
+        d = UnoccupiedArmDesignator(self._robot.arms, self._robot.rightArm, name="empty_arm_designator2")
         if d.resolve():
             return "yes"
         return "no"
@@ -48,7 +46,7 @@ class ArmOccupied(smach.State):
         self._robot = robot
 
     def execute(self, userdata):
-	d = OccupiedArmDesignator(self._robot.arms, self._robot.rightArm, name="empty_arm_designator2")
+        d = OccupiedArmDesignator(self._robot.arms, self._robot.rightArm, name="empty_arm_designator2")
         if d.resolve():
             return "yes"
         return "no"
