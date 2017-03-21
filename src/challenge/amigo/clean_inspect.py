@@ -47,7 +47,7 @@ class CleanInspect(smach.StateMachine):
                 next_state = "RESET_ED_%d" % (i + 1) if i + 1 < len(segment_areas) else "done"
 
                 smach.StateMachine.add("SAY_UNREACHABLE_%d" % i,
-                                       robot_smach_states.Say(robot, ["I failed to inspect the %s" % location_id], block=False),
+                                       robot_smach_states.Say(robot, ["I failed to inspect the %s" % location_id], block=True),
                                        transitions={"spoken":next_state})
 
                 smach.StateMachine.add("HANDLE_DETECTED_ENTITIES_%d" % i,
