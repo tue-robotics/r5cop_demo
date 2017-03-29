@@ -8,6 +8,7 @@ import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
 from image_recognition_msgs.srv import Recognize
 import cv2
+from timeout import Timeout
 
 
 def _get_cropped_image_from_info(info):        
@@ -51,6 +52,14 @@ class OperatorFeedback(smach.State):
         self._service_proxy = rospy.ServiceProxy("/manual", Recognize)
         self._garbage_type_list = []
 
+    def _request(self, img_msg):
+        res = self._service_proxy(image=img_msg)
+        return res
+
+    def _request_with_timeout(self, img_msg, timeout):
+        timeout_function = Timeout(self._request, timeout)
+        return timeout_function(img_msg)
+
     def execute(self, userdata):
         e = self._selected_entity_designator.resolve()
 
@@ -80,10 +89,10 @@ class OperatorFeedback(smach.State):
             return "no_cleanup"
 
         try:
-            res = self._service_proxy(image=img_msg)
-        except rospy.ServiceException as e:
+            res = self._request_with_timeout(img_msg, 10)
+        except Exception as e:
+            rospy.logerr("Service call failed:")
             rospy.logerr(e)
-            rospy.logerr("Operator service call failed, I will not clean up the object")
             self._robot.speech.speak("I could not reach my operator")
             return "no_cleanup"
 
