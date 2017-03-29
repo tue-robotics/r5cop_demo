@@ -89,7 +89,7 @@ class OperatorFeedback(smach.State):
             return "no_cleanup"
 
         try:
-            res = self._request_with_timeout(img_msg, 10)
+            res = self._request_with_timeout(img_msg, 40)
         except Exception as e:
             rospy.logerr("Service call failed:")
             rospy.logerr(e)
