@@ -56,6 +56,7 @@ class OperatorFeedback(smach.State):
 
         # If we have cached it, clean it up
         if e.type in self._garbage_type_list:
+            self._robot.speech.speak("Oh wait, I already know this item, I will clean it up immediately.")
             return "cleanup"
 
         if not e:
@@ -83,13 +84,17 @@ class OperatorFeedback(smach.State):
         except rospy.ServiceException as e:
             rospy.logerr(e)
             rospy.logerr("Operator service call failed, I will not clean up the object")
-            self._robot.speech.speak("I could not reach my operator, I will leave this object here")
+            self._robot.speech.speak("I could not reach my operator")
             return "no_cleanup"
 
-        print res
+        rospy.loginfo(res)
+
+        label = ""
+        if res.recognitions and res.recognitions[0].categorical_distribution.probabilities:
+            label = res.recognitions[0].categorical_distribution.probabilities[0].label
 
         # For now if it is not recognized as something useful, we clean it up
-        if not res.recognitions:
+        if not label or "trash" in label.lower():
             # Keep track of what object apperently is something ;; we do have the type of the classification
             if e.type:
                 self._garbage_type_list.append(e.type)
@@ -116,4 +121,16 @@ class OperatorCleanup(smach.StateMachine):
 
             smach.StateMachine.add('OPERATOR_FEEDBACK',
                                    OperatorFeedback(robot, selected_entity_designator),
-                                   transitions={"cleanup": "cleanup", "no_cleanup": "no_cleanup"})
+                                   transitions={"cleanup": "SAY_CLEANUP", "no_cleanup": "SAY_NO_CLEANUP"})
+
+            smach.StateMachine.add('SAY_CLEANUP',
+                                robot_smach_states.Say(robot, ["Ok, I will cleanup the object",
+                                                                "That ok!",
+                                                                "As you wish"], block=True),
+                                transitions={"spoken": "cleanup"})
+
+            smach.StateMachine.add('SAY_NO_CLEANUP',
+                                robot_smach_states.Say(robot, ["Ok, I will leave the object here",
+                                                                "That's ok! I will continue",
+                                                                "Now I know that this object is not trash"], block=True),
+                                transitions={"spoken": "no_cleanup"})
