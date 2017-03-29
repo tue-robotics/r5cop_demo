@@ -69,10 +69,7 @@ class Speak(smach.State):
     def execute(self, userdata):
         e = self._selected_entity_designator.resolve()
 
-        if e and e.type != "":
-            e_type = e.type
-        else:
-            e_type = random.choice(["unknown object", "trash object", "garbage object"])
+        e_type = random.choice(["item", "object", "trash"])
 
         self._robot.speech.speak(random.choice(self._sentences) % e_type, block=False)
 
