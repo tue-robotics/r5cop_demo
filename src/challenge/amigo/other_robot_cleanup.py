@@ -58,8 +58,8 @@ class OtherRobotCleanup(smach.StateMachine):
                                    transitions={"done": "WAIT_FOR_TRIGGER", "failed": "SAY_FAILED"})
 
             smach.StateMachine.add('WAIT_FOR_TRIGGER',
-                                   robot_smach_states.WaitForTrigger(robot, ["continue"], "/amigo/trigger"),
-                                   transitions={"continue": "SAY_DONE", "preempted" : "SAY_FAILED"})
+                                   robot_smach_states.WaitForTrigger(robot, ["continue", "gpsr"], "/amigo/trigger"),
+                                   transitions={"continue": "SAY_DONE", "gpsr": "SAY_FAILED", "preempted" : "SAY_FAILED"})
 
             smach.StateMachine.add('SAY_DONE',
                                    robot_smach_states.Say(robot, ["Thanks for cleaning", "Thank you", "You are the best"], block=True),
