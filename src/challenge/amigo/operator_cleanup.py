@@ -134,7 +134,7 @@ class OperatorCleanup(smach.StateMachine):
 
             smach.StateMachine.add('SAY_CLEANUP',
                                 robot_smach_states.Say(robot, ["Ok, I will cleanup the object",
-                                                                "That ok!",
+                                                                "That's ok!",
                                                                 "As you wish"], block=True),
                                 transitions={"spoken": "cleanup"})
 
