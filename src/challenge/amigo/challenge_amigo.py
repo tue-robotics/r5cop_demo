@@ -10,6 +10,25 @@ from clean_inspect import CleanInspect
 from robocup_knowledge import load_knowledge
 challenge_knowledge = load_knowledge('r5cop_demo')
 
+class VerifyWorldModelInfo(smach.State):
+    def __init__(self, robot):
+        smach.State.__init__(self, outcomes=["failed", "done"])
+        self._robot = robot
+
+    def execute(self, userdata):
+
+        ids = [e.id for e in self._robot.ed.get_entities()]
+        if "trashbin" not in ids:
+            return "failed"
+
+        for place in challenge_knowledge.inspection_places:
+            if place["entity_id"] not in ids:
+                return "failed"
+            if place["room_id"] not in ids:
+                return "failed"
+
+        return "done"
+
 
 def setup_statemachine(robot):
 
@@ -33,7 +52,16 @@ def setup_statemachine(robot):
 
         smach.StateMachine.add('WAIT_FOR_TRIGGER',
                                 robot_smach_states.WaitForTrigger(robot, ["gpsr"], "/amigo/trigger"),
-                                transitions={"gpsr": "SAY_START_CHALLENGE", "preempted" : "SAY_START_CHALLENGE"})
+                                transitions={"gpsr": "VERIFY", "preempted" : "VERIFY"})
+
+        smach.StateMachine.add('VERIFY',
+                                VerifyWorldModelInfo(robot),
+                                transitions={"done": "SAY_START_CHALLENGE", "failed" : "SAY_KNOWLEDGE_NOT_COMPLETE"})
+
+        smach.StateMachine.add('SAY_KNOWLEDGE_NOT_COMPLETE',
+                               robot_smach_states.Say(robot, ["My knowledge of the world is not complete!",
+                                                              "Please give me some more information!"], block=False),
+                               transitions={"spoken": "SAY_WAITING_FOR_TRIGGER"})
 
         smach.StateMachine.add('SAY_START_CHALLENGE',
                                robot_smach_states.Say(robot, ["Starting R5COP Cooperative cleaning demonstrator",
