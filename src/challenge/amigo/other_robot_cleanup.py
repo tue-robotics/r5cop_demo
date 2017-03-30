@@ -8,7 +8,7 @@ from robot_smach_states.util.designators import EntityByIdDesignator
 from robocup_knowledge import load_knowledge
 challenge_knowledge = load_knowledge('r5cop_demo')
 
-other_robot_name = "x80sv"
+other_robot_name = "x-80sv"
 
 class ContactOtherRobot(smach.State):
     def __init__(self, robot, selected_entity_designator):
@@ -66,5 +66,5 @@ class OtherRobotCleanup(smach.StateMachine):
                                    transitions={"spoken": "done"})
 
             smach.StateMachine.add('SAY_FAILED',
-                                   robot_smach_states.Say(robot, ["Too bad, then we will just leave that trash here"], block=True),
+                                   robot_smach_states.Say(robot, ["Too bad then, we will just leave that trash there"], block=True),
                                    transitions={"spoken": "done"})
