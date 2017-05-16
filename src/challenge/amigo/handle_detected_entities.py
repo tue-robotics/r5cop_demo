@@ -45,10 +45,10 @@ class DetermineAction(smach.State):
         _loginfo_color("== GET ACTION OUTCOME ==")
         _loginfo_color("Known types: '%s'" % self._known_types)
         _loginfo_color("Entity type: '%s'" % e.type)
-        _loginfo_color("Entity pose position z: '%.3f'" % e.pose.position.z)
+        _loginfo_color("Entity pose position z: '%.3f'" % e.pose.frame.p.z())
 
         # Check if the object is on the ground
-        if e.pose.position.z < 0.4:
+        if e.pose.frame.p.z() < 0.4:
             _loginfo_color("Object is on the ground, we cannot grasp it, call for help")
             action = "other_robot"
         else:
@@ -75,8 +75,8 @@ class DetermineAction(smach.State):
         # If we don't know the entity type, try to classify again
         if selected_entity.type == "" or selected_entity.type == "unknown":
             # Make sure the head looks at the entity
-            pos = selected_entity.pose.position
-            self._robot.head.look_at_point(msgs.PointStamped(pos.x, pos.y, 0.8, "/map"), timeout=10)
+            pos = selected_entity.pose.frame.p
+            self._robot.head.look_at_point(msgs.PointStamped(pos.x(), pos.y(), 0.8, "/map"), timeout=10)
 
             # This is needed because the head is not entirely still when the look_at_point function finishes
             rospy.sleep(1)
